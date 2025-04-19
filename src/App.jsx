@@ -1,29 +1,92 @@
+import { useState, useRef } from "react";
+import Navbar from "./components/Navbar.jsx";
+import SidebarTopics from "./components/SidebarTopics.jsx";
+import PostFeed from "./components/PostFeed.jsx";
+import InboxChat from "./components/InboxChat.jsx";
+import Auth from "./components/Auth.jsx";
+import RightSidebar from "./components/RightSidebar.jsx";
+import HeroSection from "./components/HeroSection.jsx";
+import Footer from "./components/Footer.jsx";
+import WaveDivider from "./components/WaveDivider.jsx";
+import ScrollTeaser from "./components/ScrollTeaser.jsx";
+import UserProfile from "./components/UserProfile.jsx";
+import SplashOverlay from "./components/SplashOverlay.jsx"; // ✅ Splash screen
+import ParallaxBackground from "./components/ParallaxBackground.jsx"; // ✅ Parallaxe
 
 function App() {
+  const [user, setUser] = useState(null);
+  const [currentPage, setCurrentPage] = useState("feed");
+  const [showAuth, setShowAuth] = useState(false);
+
+  const postFeedRef = useRef(null);
+
+  const handleLogin = (username) => {
+    localStorage.setItem("move2getr_user", username);
+    setUser(username);
+    setShowAuth(false);
+  };
+
+  const scrollToFeed = () => {
+    postFeedRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-[#d9735b] via-white to-[#dff6dd] flex items-center justify-center p-6">
-      <div className="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-2xl text-center space-y-6 border-4 border-[#d9735b]">
-        <h1 className="text-4xl font-bold text-[#d9735b] drop-shadow-sm">
-          Bienvenue sur <span className="text-green-600">Move2getr</span>
-        </h1>
-        <p className="text-gray-700 text-lg">
-          Une communauté pensée pour les <strong>étudiants africains</strong> en Europe 🌍
-        </p>
-        <div className="flex justify-center gap-4 flex-wrap">
-          <button className="px-6 py-2 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition">
-            Explorer les Posts
-          </button>
-          <button className="px-6 py-2 bg-[#d9735b] text-white font-semibold rounded-xl hover:bg-[#c85e44] transition">
-            Créer un Compte
-          </button>
+    <div className="bg-gray-50 min-h-screen overflow-x-hidden flex flex-col relative">
+      {/* BACKGROUND PARALLAX */}
+      <ParallaxBackground />
+
+      {/* SPLASH OVERLAY PAR-DESSUS */}
+      <SplashOverlay />
+
+      {/* NAVBAR */}
+      <Navbar
+        onNavigate={setCurrentPage}
+        isLoggedIn={!!user}
+        onShowLogin={() => setShowAuth(true)}
+      />
+
+      {/* FORMULAIRE DE CONNEXION */}
+      {showAuth && <Auth onLogin={handleLogin} />}
+
+      {/* PAGE PRINCIPALE */}
+      {!showAuth && (
+        <div className="flex flex-1 max-w-[1600px] mx-auto w-full">
+          {/* SIDEBAR GAUCHE */}
+          {currentPage === "feed" && <SidebarTopics />}
+
+          {/* CONTENU CENTRAL */}
+          <main className="flex-1 p-4 overflow-hidden">
+            {currentPage === "feed" && (
+              <>
+                {!user && (
+                  <>
+                    <HeroSection onJoinClick={scrollToFeed} />
+                    <WaveDivider />
+                    <ScrollTeaser />
+                  </>
+                )}
+                <div ref={postFeedRef}>
+                  <PostFeed user={user} />
+                </div>
+              </>
+            )}
+
+            {currentPage === "inbox" && (
+              <InboxChat currentUser={user || "Visiteur"} />
+            )}
+
+            {currentPage === "profile" && <UserProfile user={user} />}
+          </main>
+
+          {/* SIDEBAR DROITE */}
+          {currentPage === "feed" && <RightSidebar />}
         </div>
-        <p className="text-sm text-gray-500 italic mt-4">
-          “Là où les racines africaines rencontrent les rêves européens.”
-        </p>
-      </div>
+      )}
+
+      {/* FOOTER */}
+      {!showAuth && <Footer />}
     </div>
   );
 }
 
-
-export default App
+export default App;
