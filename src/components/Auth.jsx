@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-// Liste simplifiée des pays africains (on peut en rajouter si besoin)
 const africanCountries = [
   "Côte d'Ivoire", "Sénégal", "Mali", "Burkina Faso", "Togo",
   "Bénin", "Cameroun", "Gabon", "Congo", "RD Congo", "Nigéria",
@@ -50,148 +49,159 @@ export default function Auth({ onLogin }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white shadow-lg p-8 rounded-lg w-full max-w-lg space-y-4"
-      >
-        <h2 className="text-2xl font-bold text-center text-orange-600 mb-4">
-          {isRegister ? "Créer un compte" : "Connexion"}
-        </h2>
+    <div className="fixed inset-0 bg-[url('/background.jpg')] bg-cover bg-center backdrop-blur-sm flex items-center justify-center">
+      <div className="bg-white/90 shadow-2xl rounded-xl flex max-w-5xl w-full mx-6">
+        {/* Partie gauche avec branding */}
+        <div className="w-1/2 hidden md:flex flex-col justify-center p-10">
+          <h1 className="text-4xl font-bold text-green-700 mb-4">MOVE2GETR</h1>
+          <p className="text-lg text-gray-700">
+            Crée des liens. Reste connecté. Explore l’Europe en communauté.
+          </p>
+        </div>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Adresse email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-          required
-        />
+        {/* Formulaire */}
+        <form
+          onSubmit={handleSubmit}
+          className="w-full md:w-1/2 p-8 space-y-4"
+        >
+          <h2 className="text-2xl font-bold text-center text-red-600">
+            {isRegister ? "Créer un compte" : "Connexion"}
+          </h2>
 
-        {isRegister && (
-          <>
-            <div className="flex gap-4">
+          <input
+            type="email"
+            name="email"
+            placeholder="Adresse email"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+            required
+          />
+
+          {isRegister && (
+            <>
+              <div className="flex gap-4">
+                <input
+                  type="text"
+                  name="nom"
+                  placeholder="Nom"
+                  value={formData.nom}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded"
+                  required
+                />
+                <input
+                  type="text"
+                  name="prenoms"
+                  placeholder="Prénoms"
+                  value={formData.prenoms}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded"
+                  required
+                />
+              </div>
+
               <input
                 type="text"
-                name="nom"
-                placeholder="Nom"
-                value={formData.nom}
+                name="username"
+                placeholder="Nom d'utilisateur"
+                value={formData.username}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border rounded focus:outline-none"
+                className="w-full px-4 py-2 border rounded"
                 required
               />
+
               <input
-                type="text"
-                name="prenoms"
-                placeholder="Prénoms"
-                value={formData.prenoms}
+                type="password"
+                name="password"
+                placeholder="Mot de passe"
+                value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border rounded focus:outline-none"
+                className="w-full px-4 py-2 border rounded"
                 required
               />
-            </div>
 
-            <input
-              type="text"
-              name="username"
-              placeholder="Nom d'utilisateur"
-              value={formData.username}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded focus:outline-none"
-              required
-            />
+              <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Confirmez le mot de passe"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border rounded"
+                required
+              />
 
+              <div className="flex gap-4">
+                <select
+                  name="nationalite"
+                  value={formData.nationalite}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded"
+                  required
+                >
+                  <option value="">-- Nationalité --</option>
+                  {africanCountries.map((country, index) => (
+                    <option key={index} value={country}>
+                      {country}
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  type="number"
+                  name="age"
+                  placeholder="Âge"
+                  value={formData.age}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded"
+                  required
+                />
+              </div>
+
+              <select
+                name="genre"
+                value={formData.genre}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border rounded"
+                required
+              >
+                <option value="">-- Genre --</option>
+                <option value="Homme">Homme</option>
+                <option value="Femme">Femme</option>
+                <option value="Autre">Autre</option>
+              </select>
+            </>
+          )}
+
+          {!isRegister && (
             <input
               type="password"
               name="password"
               placeholder="Mot de passe"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded focus:outline-none"
-              required
-            />
-
-            <input
-              type="password"
-              name="confirmPassword"
-              placeholder="Confirmez le mot de passe"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded focus:outline-none"
-              required
-            />
-
-            <div className="flex gap-4">
-              <select
-                name="nationalite"
-                value={formData.nationalite}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border rounded"
-                required
-              >
-                <option value="">-- Nationalité --</option>
-                {africanCountries.map((country, index) => (
-                  <option key={index} value={country}>
-                    {country}
-                  </option>
-                ))}
-              </select>
-
-              <input
-                type="number"
-                name="age"
-                placeholder="Âge"
-                value={formData.age}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border rounded"
-                required
-              />
-            </div>
-
-            <select
-              name="genre"
-              value={formData.genre}
-              onChange={handleChange}
               className="w-full px-4 py-2 border rounded"
               required
-            >
-              <option value="">-- Genre --</option>
-              <option value="Homme">Homme</option>
-              <option value="Femme">Femme</option>
-              <option value="Autre">Autre</option>
-            </select>
-          </>
-        )}
+            />
+          )}
 
-        {!isRegister && (
-          <input
-            type="password"
-            name="password"
-            placeholder="Mot de passe"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded focus:outline-none"
-            required
-          />
-        )}
+          <button
+            type="submit"
+            className="bg-green-600 text-white w-full py-2 rounded hover:bg-green-700 transition"
+          >
+            {isRegister ? "S'inscrire" : "Se connecter"}
+          </button>
 
-        <button
-          type="submit"
-          className="bg-orange-600 text-white w-full py-2 rounded hover:bg-orange-700 transition"
-        >
-          {isRegister ? "S'inscrire" : "Se connecter"}
-        </button>
-
-        <p
-          className="text-sm text-center text-gray-600 cursor-pointer hover:underline"
-          onClick={() => setIsRegister(!isRegister)}
-        >
-          {isRegister
-            ? "Tu as déjà un compte ? Connecte-toi"
-            : "Pas encore inscrit ? Crée un compte"}
-        </p>
-      </form>
+          <p
+            className="text-sm text-center text-gray-600 cursor-pointer hover:underline"
+            onClick={() => setIsRegister(!isRegister)}
+          >
+            {isRegister
+              ? "Tu as déjà un compte ? Connecte-toi"
+              : "Pas encore inscrit ? Crée un compte"}
+          </p>
+        </form>
+      </div>
     </div>
   );
 }
