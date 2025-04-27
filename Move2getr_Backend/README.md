@@ -15,7 +15,7 @@ It handles [authentication, API, database operations, etc. — you can adjust th
 
 ## 🛠️ Tech Stack
 
-- Framework: [e.g., FastAPI, Express.js, Django, etc.]
-- Language: [e.g., Python, Node.js]
-- Database: [e.g., PostgreSQL, MongoDB]
-- Others: [e.g., Docker, Redis, etc.]
+- Framework: [FastAPI]
+- Language: [Python]
+- Database: [PostgreSQL]
+- Others: [Docker, Redis]
