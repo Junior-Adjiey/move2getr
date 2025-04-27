@@ -16,3 +16,4 @@ class Account(SQLModel, table=True):
     gender: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
     is_admin: bool = Field(default=False)  # 👈 this is the new field
+

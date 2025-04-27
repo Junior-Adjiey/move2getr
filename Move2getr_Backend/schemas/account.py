@@ -1,5 +1,18 @@
 from pydantic import BaseModel, EmailStr, validator
 
+from typing import Optional
+from pydantic import BaseModel
+
+class AccountPatch(BaseModel):
+    email: Optional[str] = None
+    username: Optional[str] = None
+    password: Optional[str] = None
+    name: Optional[str] = None
+    surname: Optional[str] = None
+    nationality: Optional[str] = None
+    age: Optional[int] = None
+    gender: Optional[str] = None
+
 class AccountCreate(BaseModel):
     email: EmailStr
     username: str
@@ -26,4 +39,9 @@ class AccountRead(BaseModel):
     nationality: str
     age: int
     gender: str
+    
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
 

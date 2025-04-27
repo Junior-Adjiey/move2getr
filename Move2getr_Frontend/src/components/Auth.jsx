@@ -1,4 +1,8 @@
 import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 const africanCountries = [
   "Côte d'Ivoire", "Sénégal", "Mali", "Burkina Faso", "Togo",
@@ -11,15 +15,17 @@ export default function Auth({ onLogin }) {
   const [isRegister, setIsRegister] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
-    nom: "",
-    prenoms: "",
     username: "",
     password: "",
     confirmPassword: "",
-    nationalite: "",
+    name: "",
+    surname: "",
+    nationality: "",
     age: "",
-    genre: "",
+    gender: "",
   });
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,28 +36,74 @@ export default function Auth({ onLogin }) {
     return regex.test(password);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isRegister) {
-      if (!validatePassword(formData.password)) {
-        alert("Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un symbole.");
-        return;
-      }
-      if (formData.password !== formData.confirmPassword) {
-        alert("Les mots de passe ne correspondent pas.");
-        return;
-      }
-    }
+    setLoading(true);
 
-    const usernameToSave = isRegister ? formData.username : formData.email;
-    localStorage.setItem("move2getr_user", usernameToSave);
-    onLogin(usernameToSave);
+    try {
+      if (isRegister) {
+        if (!validatePassword(formData.password)) {
+          toast.error("❌ Le mot de passe doit contenir une majuscule, un chiffre et un symbole.");
+          setLoading(false);
+          return;
+        }
+        if (formData.password !== formData.confirmPassword) {
+          toast.error("❌ Les mots de passe ne correspondent pas.");
+          setLoading(false);
+          return;
+        }
+
+        await axios.post("http://127.0.0.1:8000/auth/register", {
+          email: formData.email,
+          username: formData.username,
+          password: formData.password,
+          confirm_password: formData.confirmPassword, // ✅ Correct field name here!
+          name: formData.name,
+          surname: formData.surname,
+          nationality: formData.nationality,
+          age: parseInt(formData.age),
+          gender: formData.gender,
+        });
+
+        toast.success("🎉 Compte créé avec succès !");
+        setIsRegister(false);
+        setLoading(false);
+        return;
+      }
+
+      // LOGIN
+      const res = await axios.post("http://127.0.0.1:8000/auth/login", {
+        email: formData.email,
+        password: formData.password,
+      });
+
+      localStorage.setItem("token", res.data.access_token);
+      onLogin(res.data.access_token);
+      navigate("/dashboard");
+
+    } catch (error) {
+      console.error(error);
+      if (error.response?.data?.detail) {
+        toast.error(`❌ ${error.response.data.detail}`);
+      } else {
+        toast.error("❌ Erreur inconnue lors de l'authentification.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="fixed inset-0 bg-[url('/background.jpg')] bg-cover bg-center backdrop-blur-sm flex items-center justify-center">
+      <ToastContainer position="top-right" autoClose={3000} />
+      
+      {loading && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-green-500"></div>
+        </div>
+      )}
+
       <div className="bg-white/90 shadow-2xl rounded-xl flex max-w-5xl w-full mx-6">
-        {/* Partie gauche avec branding */}
         <div className="w-1/2 hidden md:flex flex-col justify-center p-10">
           <h1 className="text-4xl font-bold text-green-700 mb-4">MOVE2GETR</h1>
           <p className="text-lg text-gray-700">
@@ -59,7 +111,6 @@ export default function Auth({ onLogin }) {
           </p>
         </div>
 
-        {/* Formulaire */}
         <form
           onSubmit={handleSubmit}
           className="w-full md:w-1/2 p-8 space-y-4"
@@ -83,18 +134,18 @@ export default function Auth({ onLogin }) {
               <div className="flex gap-4">
                 <input
                   type="text"
-                  name="nom"
+                  name="name"
                   placeholder="Nom"
-                  value={formData.nom}
+                  value={formData.name}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded"
                   required
                 />
                 <input
                   type="text"
-                  name="prenoms"
+                  name="surname"
                   placeholder="Prénoms"
-                  value={formData.prenoms}
+                  value={formData.surname}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded"
                   required
@@ -133,15 +184,15 @@ export default function Auth({ onLogin }) {
 
               <div className="flex gap-4">
                 <select
-                  name="nationalite"
-                  value={formData.nationalite}
+                  name="nationality"
+                  value={formData.nationality}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded"
                   required
                 >
                   <option value="">-- Nationalité --</option>
-                  {africanCountries.map((country, index) => (
-                    <option key={index} value={country}>
+                  {africanCountries.map((country, idx) => (
+                    <option key={idx} value={country}>
                       {country}
                     </option>
                   ))}
@@ -159,8 +210,8 @@ export default function Auth({ onLogin }) {
               </div>
 
               <select
-                name="genre"
-                value={formData.genre}
+                name="gender"
+                value={formData.gender}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border rounded"
                 required
@@ -187,7 +238,8 @@ export default function Auth({ onLogin }) {
 
           <button
             type="submit"
-            className="bg-green-600 text-white w-full py-2 rounded hover:bg-green-700 transition"
+            className="bg-green-600 text-white w-full py-2 rounded hover:bg-green-700 transition flex justify-center items-center"
+            disabled={loading}
           >
             {isRegister ? "S'inscrire" : "Se connecter"}
           </button>
@@ -205,3 +257,5 @@ export default function Auth({ onLogin }) {
     </div>
   );
 }
+
+

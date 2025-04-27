@@ -1,29 +1,48 @@
-import { useState, useRef } from "react";
-import Navbar from "./components/Navbar.jsx";
-import SidebarTopics from "./components/SidebarTopics.jsx";
-import PostFeed from "./components/PostFeed.jsx";
-import InboxChat from "./components/InboxChat.jsx";
-import Auth from "./components/Auth.jsx";
-import RightSidebar from "./components/RightSidebar.jsx";
-import HeroSection from "./components/HeroSection.jsx";
-import Footer from "./components/Footer.jsx";
-import WaveDivider from "./components/WaveDivider.jsx";
-import ScrollTeaser from "./components/ScrollTeaser.jsx";
-import UserProfile from "./components/UserProfile.jsx";
-import SplashOverlay from "./components/SplashOverlay.jsx"; // ✅ Splash screen
-import ParallaxBackground from "./components/ParallaxBackground.jsx"; // ✅ Parallaxe
+import { Routes, Route, useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
 
-function App() {
-  const [user, setUser] = useState(null);
-  const [currentPage, setCurrentPage] = useState("feed");
+import Navbar from "./components/Navbar";
+import SidebarTopics from "./components/SidebarTopics";
+import PostFeed from "./components/PostFeed";
+import InboxChat from "./components/InboxChat";
+import Auth from "./components/Auth";
+import RightSidebar from "./components/RightSidebar";
+import HeroSection from "./components/HeroSection";
+import Footer from "./components/Footer";
+import WaveDivider from "./components/WaveDivider";
+import ScrollTeaser from "./components/ScrollTeaser";
+import UserProfile from "./components/UserProfile";
+import SplashOverlay from "./components/SplashOverlay";
+import ParallaxBackground from "./components/ParallaxBackground";
+import Dashboard from "./components/Dashboard";
+
+export default function App() {
+  const [user, setUser] = useState(localStorage.getItem("token"));
   const [showAuth, setShowAuth] = useState(false);
-
+  const [currentPage, setCurrentPage] = useState("feed");
   const postFeedRef = useRef(null);
+  const navigate = useNavigate();
 
-  const handleLogin = (username) => {
-    localStorage.setItem("move2getr_user", username);
-    setUser(username);
+  useEffect(() => {
+    if (!user && (currentPage === "inbox" || currentPage === "profile")) {
+      setShowAuth(true);
+    }
+  }, [currentPage, user]);
+
+  const handleLogin = (token) => {
+    localStorage.setItem("token", token);
+    setUser(token);
     setShowAuth(false);
+    setCurrentPage("feed"); // after login return to feed
+    navigate("/");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+    setCurrentPage("feed");
+    setShowAuth(true);
+    navigate("/");
   };
 
   const scrollToFeed = () => {
@@ -32,29 +51,27 @@ function App() {
 
   return (
     <div className="bg-gray-50 min-h-screen overflow-x-hidden flex flex-col relative">
-      {/* BACKGROUND PARALLAX */}
       <ParallaxBackground />
-
-      {/* SPLASH OVERLAY PAR-DESSUS */}
       <SplashOverlay />
 
-      {/* NAVBAR */}
+      {/* Navbar */}
       <Navbar
         onNavigate={setCurrentPage}
         isLoggedIn={!!user}
         onShowLogin={() => setShowAuth(true)}
+        onLogout={handleLogout}
       />
 
-      {/* FORMULAIRE DE CONNEXION */}
+      {/* Auth Form */}
       {showAuth && <Auth onLogin={handleLogin} />}
 
-      {/* PAGE PRINCIPALE */}
+      {/* Main Website */}
       {!showAuth && (
         <div className="flex flex-1 max-w-[1600px] mx-auto w-full">
-          {/* SIDEBAR GAUCHE */}
+          {/* Sidebar Left */}
           {currentPage === "feed" && <SidebarTopics />}
 
-          {/* CONTENU CENTRAL */}
+          {/* Main Content */}
           <main className="flex-1 p-4 overflow-hidden">
             {currentPage === "feed" && (
               <>
@@ -72,21 +89,25 @@ function App() {
             )}
 
             {currentPage === "inbox" && (
-              <InboxChat currentUser={user || "Visiteur"} />
+              user ? <InboxChat currentUser={user} /> : <div>🔒 Veuillez vous connecter.</div>
             )}
 
-            {currentPage === "profile" && <UserProfile user={user} />}
+            {currentPage === "profile" && (
+              user ? <UserProfile /> : <div>🔒 Veuillez vous connecter.</div>
+            )}
           </main>
 
-          {/* SIDEBAR DROITE */}
+          {/* Sidebar Right */}
           {currentPage === "feed" && <RightSidebar />}
         </div>
       )}
 
-      {/* FOOTER */}
+      {/* Footer */}
       {!showAuth && <Footer />}
     </div>
   );
 }
 
-export default App;
+
+
+

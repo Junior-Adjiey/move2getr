@@ -1,69 +1,86 @@
-import { useState } from "react";
+// src/components/UserSettings.jsx
+
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+import UploadAvatar from "./UploadAvatar";
+import PatchProfileForm from "./PatchProfileForm";
+import DangerZone from "./DangerZone";
 
 export default function UserSettings() {
-  const [formData, setFormData] = useState({
-    prenom: "Adjiey",
-    nom: "Koffi Jean-Luc",
-    username: "moveur1",
-    email: "moveur1@example.com",
-    age: 19,
-    genre: "Homme",
-    nationalite: "Côte d'Ivoire",
-    password: "",
-    confirmPassword: "",
-  });
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const nationalitesAfricaines = [
-    "Côte d'Ivoire", "Sénégal", "Cameroun", "Mali", "Burkina Faso", "Togo", "Bénin", "Guinée", "Congo", "Gabon",
-    "RDC", "Niger", "Tchad", "Algérie", "Tunisie", "Maroc", "Afrique du Sud", "Kenya", "Nigeria", "Ghana"
-  ];
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (formData.password && formData.password !== formData.confirmPassword) {
-      alert("Les mots de passe ne correspondent pas");
-      return;
+  const fetchProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get("http://127.0.0.1:8000/auth/me", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUser(res.data);
+    } catch (error) {
+      console.error(error);
+      toast.error("Erreur de chargement du profil.");
+    } finally {
+      setLoading(false);
     }
-    console.log("Informations enregistrées :", formData);
-    alert("Profil mis à jour avec succès !");
   };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen text-xl font-bold">
+        Chargement...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center h-screen text-xl font-bold">
+        Erreur de profil
+      </div>
+    );
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md space-y-4">
-      <h2 className="text-xl font-bold text-[#3B2F2F] mb-4">Paramètres du profil</h2>
+    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-green-100 p-6">
+      <ToastContainer position="top-right" autoClose={3000} />
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <input name="prenom" value={formData.prenom} onChange={handleChange} placeholder="Prénom" className="border p-2 rounded" />
-        <input name="nom" value={formData.nom} onChange={handleChange} placeholder="Nom" className="border p-2 rounded" />
-        <input name="username" value={formData.username} onChange={handleChange} placeholder="Nom d'utilisateur" className="border p-2 rounded" />
-        <input name="email" value={formData.email} onChange={handleChange} type="email" placeholder="Email" className="border p-2 rounded" />
-        <input name="age" value={formData.age} onChange={handleChange} type="number" placeholder="Age" className="border p-2 rounded" />
+      <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-md space-y-8">
 
-        <select name="genre" value={formData.genre} onChange={handleChange} className="border p-2 rounded">
-          <option value="">Genre</option>
-          <option value="Homme">Homme</option>
-          <option value="Femme">Femme</option>
-          <option value="Autre">Autre</option>
-        </select>
+        {/* Section Avatar */}
+        <section>
+          <h2 className="text-2xl font-bold text-green-700 mb-4">Photo de Profil</h2>
+          <UploadAvatar onUploadSuccess={fetchProfile} />
+        </section>
 
-        <select name="nationalite" value={formData.nationalite} onChange={handleChange} className="border p-2 rounded">
-          {nationalitesAfricaines.map((pays, i) => (
-            <option key={i} value={pays}>{pays}</option>
-          ))}
-        </select>
+        {/* Divider */}
+        <div className="border-t my-6"></div>
 
-        <input name="password" value={formData.password} onChange={handleChange} type="password" placeholder="Nouveau mot de passe" className="border p-2 rounded" />
-        <input name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} type="password" placeholder="Confirmer mot de passe" className="border p-2 rounded" />
+        {/* Section Modifier Profil */}
+        <section>
+          <h2 className="text-2xl font-bold text-green-700 mb-4">Modifier mes informations</h2>
+          <PatchProfileForm user={user} onUpdate={fetchProfile} />
+        </section>
+
+        {/* Divider */}
+        <div className="border-t my-6"></div>
+
+        {/* Section Danger Zone */}
+        <section>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Zone Dangereuse</h2>
+          <DangerZone />
+        </section>
+
       </div>
-
-      <button type="submit" className="bg-[#D9735B] text-white px-4 py-2 rounded hover:bg-[#c9614b]">
-        Enregistrer les modifications
-      </button>
-    </form>
+    </div>
   );
 }
+
+
+

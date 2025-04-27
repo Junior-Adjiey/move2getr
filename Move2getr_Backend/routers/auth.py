@@ -11,9 +11,16 @@ from schemas.token import Token
 from dependencies.auth_utils import get_current_user
 from dependencies.auth_utils import require_admin
 from fastapi.responses import Response
+from fastapi import UploadFile, File
+import shutil
+import os
+from schemas.account import AccountPatch
+from schemas.account import LoginRequest
 
 
 
+UPLOAD_DIR = "uploads/avatars"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
@@ -39,14 +46,18 @@ def register(account: AccountCreate, session: Session = Depends(get_session)):
     session.refresh(user)
     return user
 
-@router.post("/login", response_model=Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
-    user = session.exec(select(Account).where(Account.username == form_data.username)).first()
-    if not user or not verify_password(form_data.password, user.password):
+@router.post("/login")
+def login(request: LoginRequest, session: Session = Depends(get_session)):
+    user = session.exec(
+        select(Account).where(Account.email == request.email)
+    ).first()
+
+    if not user or not verify_password(request.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    token = create_access_token({"sub": user.user_id})
-    return {"access_token": token, "token_type": "bearer"}
+
+    # FIX HERE
+    access_token = create_access_token({"sub": user.user_id})
+    return {"access_token": access_token}
 
 
 @router.get("/me", response_model=AccountRead)
@@ -74,20 +85,43 @@ def delete_my_account(
     session: Session = Depends(get_session),
     current_user: Account = Depends(get_current_user)
 ):
-    print("🔍 DELETE /auth/me called")
-    print(f"✅ User ID: {current_user.user_id}")
-    print(f"✅ Username: {current_user.username}")
-    print(f"✅ Is Admin: {current_user.is_admin}")
-
-    try:
-        session.delete(current_user)
-        session.commit()
-        print("✅ User deleted successfully.")
-        return Response(status_code=204)
-    except Exception as e:
-        print(f"❌ Error during deletion: {e}")
-        raise HTTPException(status_code=500, detail="Could not delete user")
+    session.delete(current_user)
+    session.commit()
+    return Response(status_code=204)
 
 
+@router.patch("/me")
+def patch_my_profile(
+    updates: AccountPatch,
+    session: Session = Depends(get_session),
+    current_user: Account = Depends(get_current_user)
+):
+    for field, value in updates.dict(exclude_unset=True).items():
+        setattr(current_user, field, value)
+
+    session.add(current_user)
+    session.commit()
+    session.refresh(current_user)
+
+    return current_user
+
+@router.post("/upload-avatar")
+async def upload_avatar(
+    file: UploadFile = File(...),
+    session: Session = Depends(get_session),
+    current_user: Account = Depends(get_current_user)
+):
+    # Save file
+    file_path = os.path.join(UPLOAD_DIR, f"{current_user.user_id}_{file.filename}")
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    # Update user avatar path
+    current_user.avatar = file_path
+    session.add(current_user)
+    session.commit()
+    session.refresh(current_user)
+
+    return {"avatar_url": file_path}
 
 
