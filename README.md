@@ -1,94 +1,117 @@
-# MOVE2GETR
+# MOVE2GETR 🌍🚀
 
-MOVE2GETR is a MOVE2GETR is a web application dedicated to African students coming to Europe (France) to pursue their studies.
-MOVE2GETR will allow them to interact with each other, discover great deals available in France, and learn everything they need to do upon their arrival in the country.  
+> Create connections. Stay close to your community. Explore Europe together. 🌍✨
 
-✨ Features – MOVE2GETR Web App
-Create connections. Stay close to your community. Explore Europe together. 🌍✨
+---
 
-🛠️ Authentication
-🔐 Secure Registration with strong password rules (minimum 8 characters, 1 uppercase, 1 number, 1 symbol).
+# ✨ Features
 
-🔑 Login/Logout system with JWT tokens.
+## 🛠️ Authentication
+- 🔐 **Secure Registration** with strong password rules.
+- 🔑 **Login/Logout system** with JWT tokens.
+- 📨 **Email-based login**.
+- ✅ **Toast notifications** for actions.
+- 🛡️ **Session management** via localStorage.
 
-📨 Email-based login.
+## 🧑‍💼 User Profile
+- 🎨 **View Profile**: username, email, nationality, gender, age.
+- 🖼️ **Upload Profile Picture**.
+- ✏️ **Edit Profile** (only update changed fields).
+- ❌ **Delete Account** (Danger Zone).
+- 📢 Real-time toasts for updates and deletions.
 
-✅ Toast notifications for all actions (success & errors).
+## 💬 Inbox & Messaging
+- 📥 **Inbox Page**.
+- 🔵 **Unread Message Counters**.
+- ⚡ **Real-time Messaging** (WebSocket).
+- 📨 **Mark as Read** functionality.
 
-🛡️ Session management using localStorage.
+## 🛈 Community Posting
+- 📝 **Post Feed**: Explore community posts.
+- ❤️ **Vote and Comment** on posts.
+- 🌟 Smooth scroll animations.
 
-🧑‍💼 User Profile
-🎨 View Profile: Display personal information like name, nationality, gender, age, etc.
+## 💽 Frontend
+- 🎨 **Fully responsive design**.
+- 🎈 **TailwindCSS** for styling.
+- ✨ **Loading spinners**.
+- 📼 **Splash screen & Parallax** background.
+- 🚼 Modular pages: Home, Inbox, Profile, Dashboard.
 
-🖼️ Upload Profile Picture (avatar upload support).
+## ⚙️ Backend
+- ⚡ **FastAPI** server.
+- 📃 **PostgreSQL** database with SQLModel.
+- 🔐 **Password hashing** (bcrypt).
+- 🛡️ **JWT Authentication**.
+- 💢 Full CRUD API endpoints.
 
-✏️ Edit Profile: Update only the changed fields (partial PATCH).
+---
 
-❌ Danger Zone: Allow users to permanently delete their account safely.
+# 🔧 Tech Stack
 
-🛎️ Real-time feedback with Toasts when profile is updated or deleted.
+| Frontend | Backend | Database |
+|:--------:|:-------:|:--------:|
+| React.js + Vite ⚛️ | FastAPI ⚡ | PostgreSQL 🐘 |
 
-💬 Inbox & Messaging
-📥 Inbox Page to chat with contacts.
+---
 
-🔵 Unread Message Counters per contact.
+# 🖼️ Screenshots
+*(Add your app screenshots here!)*
 
-⚡ Real-time messaging via WebSocket.
+---
 
-📬 Mark messages as read after opening a chat.
+# 📓 Setup & Installation
 
-🗨️ Community Posting
-📝 Post Feed: Users can browse community posts (dynamic).
+1. **Clone** the repo
+```bash
+git clone https://github.com/your-username/move2getr.git
+cd move2getr
+```
 
-❤️ Vote and comment (social engagement system).
+2. **Backend Setup**
+```bash
+cd Move2getr_Backend
+python -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
 
-🌟 Smooth scroll animations for a modern feed experience.
+3. **Frontend Setup**
+```bash
+cd Move2getr_Frontend
+npm install
+npm run dev
+```
 
-🖥️ Frontend
-🎨 Fully responsive design (desktop, tablet, mobile).
+4. Open your browser:
+```bash
+Frontend: http://localhost:5173
+Backend:  http://localhost:8000
+```
 
-🌈 TailwindCSS for beautiful components and styling.
+---
 
-🚀 Loading spinners during server requests.
+# ❤️ Contribution
+We welcome contributions! Fork the repo, create a branch, make improvements, and create a Pull Request.
 
-🎬 Splash screen and Parallax background for a premium UX.
+---
 
-✨ Clean separation of pages: Home, Inbox, Profile, Settings, Dashboard.
-
-⚙️ Backend
-⚡ FastAPI server with automatic validation.
-
-🗃️ PostgreSQL database using SQLModel ORM.
-
-🔐 Password hashing with bcrypt.
-
-🛡️ Token-based authentication (JWT).
-
-🔄 API endpoints for registration, login, fetching user profile, updating, deleting account.
-
-🛠️ Tech Stack
-
-Frontend	Backend	Database
-React.js + Vite ⚛️	FastAPI ⚡	PostgreSQL 🐘
-
-📸 Screenshots
-Coming soon.
-
-📚 Setup & Installation
-Clone the repository
-
-Install backend dependencies (pip install -r requirements.txt)
-
-Install frontend dependencies (npm install)
-
-Run backend: uvicorn main:app --reload
-
-Run frontend: npm run dev
-
-🚀 Enjoy!
-
-❤️ Contribution
-PRs are welcome! Fork it, branch it, propose new features.
-
-⚡ License
+# ⚡ License
 MIT License © 2025 MOVE2GETR
+
+---
+
+# 📅 Table of Contents
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Screenshots](#-screenshots)
+- [Setup & Installation](#-setup--installation)
+- [Contribution](#-contribution)
+- [License](#-license)
+
+---
+
+Made with 💖 and passion by the MOVE2GETR team 🚀.
+
+
