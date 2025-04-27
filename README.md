@@ -56,7 +56,7 @@
 ---
 
 # 🖼️ Screenshots
-*(Add your app screenshots here!)*
+*Comming soon*
 
 ---
 
