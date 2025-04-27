@@ -33,10 +33,10 @@ def get_current_user_from_token(token: str, session: Session) -> Account:
 @router.websocket("/ws/chat")
 async def websocket_endpoint(websocket: WebSocket, token: str):
     session = SessionLocal()
-    print("🔵 Received token:", token)  # 👈 debug print
+    print("🔵 Received token:", token)
     try:
         current_user = get_current_user_from_token(token, session)
-        print("🟢 Current user:", current_user.username)  # 👈 debug print
+        print("🟢 Current user:", current_user.username)
         await websocket.accept()
         active_connections[current_user.username] = websocket
 
@@ -44,48 +44,79 @@ async def websocket_endpoint(websocket: WebSocket, token: str):
             data = await websocket.receive_text()
             try:
                 data_json = json.loads(data)
-                receiver_username = data_json.get("receiver")
-                group_name = data_json.get("group")
-                plain_message = data_json.get("message")
 
-                encrypted_message = encrypt_message(plain_message)
+                if data_json.get("type") == "message":
+                    receiver_username = data_json.get("receiver")
+                    group_name = data_json.get("group")
+                    plain_message = data_json.get("message")
 
-                # Save the message in the database
-                message_db = Message(
-                    sender_username=current_user.username,
-                    receiver_username=receiver_username,
-                    content_encrypted=encrypted_message,
-                    is_read=False,  # ✅ important
-                    group_name=None  # (or the group name later for groups)
-                )
-                session.add(message_db)
-                session.commit()
+                    encrypted_message = encrypt_message(plain_message)
 
+                    # Save the message in the database
+                    message_db = Message(
+                        sender_username=current_user.username,
+                        receiver_username=receiver_username,
+                        content_encrypted=encrypted_message,
+                        is_read=False,
+                        group_name=None
+                    )
+                    session.add(message_db)
+                    session.commit()
 
-                # Private message
-                if receiver_username and receiver_username in active_connections:
-                    receiver_ws = active_connections[receiver_username]
-                    await receiver_ws.send_text(json.dumps({
-                        "sender": current_user.username,
-                        "text": plain_message
-                    }))
-                # Group message
-                elif group_name:
-                    if group_name not in group_connections:
-                        group_connections[group_name] = []
-                    # Ensure user is added once
-                    if not any(u == current_user.username for u, _ in group_connections[group_name]):
-                        group_connections[group_name].append((current_user.username, websocket))
-                    # Broadcast to group
-                    for username, conn in group_connections[group_name]:
-                        if conn != websocket:
-                            await conn.send_text(f"[{group_name}] {current_user.username}: {plain_message}")
+                    # Notify private receiver
+                    if receiver_username and receiver_username in active_connections:
+                        receiver_ws = active_connections[receiver_username]
+                        await receiver_ws.send_text(json.dumps({
+                            "type": "message",
+                            "sender": current_user.username,
+                            "text": plain_message
+                        }))
+                        # Send notification
+                        await receiver_ws.send_text(json.dumps({
+                            "type": "notification",
+                            "title": "New Message",
+                            "description": f"New message from {current_user.username}"
+                        }))
+
+                    # Group message
+                    elif group_name:
+                        if group_name not in group_connections:
+                            group_connections[group_name] = []
+                        if not any(u == current_user.username for u, _ in group_connections[group_name]):
+                            group_connections[group_name].append((current_user.username, websocket))
+
+                        for username, conn in group_connections[group_name]:
+                            if conn != websocket:
+                                await conn.send_text(json.dumps({
+                                    "type": "group_message",
+                                    "group": group_name,
+                                    "sender": current_user.username,
+                                    "text": plain_message
+                                }))
+
+                    else:
+                        await websocket.send_text(f"❌ Receiver not found.")
+
+                elif data_json.get("type") == "notification":
+                    # Manual notifications (like post like, comment, etc)
+                    receiver_username = data_json.get("receiver")
+                    title = data_json.get("title")
+                    description = data_json.get("description")
+
+                    if receiver_username and receiver_username in active_connections:
+                        receiver_ws = active_connections[receiver_username]
+                        await receiver_ws.send_text(json.dumps({
+                            "type": "notification",
+                            "title": title,
+                            "description": description
+                        }))
+
                 else:
-                    await websocket.send_text(f"❌ Receiver not found.")
+                    await websocket.send_text("❌ Invalid type. Must be 'message' or 'notification'.")
 
             except Exception as e:
                 print(f"WebSocket error: {e}")
-                await websocket.send_text("Invalid message format. Use JSON {receiver/group, message}")
+                await websocket.send_text("Invalid message format. Use JSON {receiver/group/message/type}")
 
     except WebSocketDisconnect:
         if current_user.username in active_connections:
@@ -97,6 +128,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str):
     except Exception as e:
         print(f"WebSocket error: {e}")
         await websocket.close(code=1008)
+
 
 
 @router.get("/chats/unread-count")

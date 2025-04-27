@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import FastAPI
-from routers import auth, groups, posts, votes, messaging
+from routers import auth, groups, posts, votes, messaging, resources
 from sqlmodel import SQLModel
 from db import engine
 from models.post import Post
@@ -31,6 +31,7 @@ app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(groups.router, prefix="/groups", tags=["Groups"])
 app.include_router(posts.router, prefix="/posts", tags=["Posts"])
 app.include_router(votes.router, prefix="/votes", tags=["Votes"])
+app.include_router(resources.router, prefix="/resources", tags=["Resources"])  # 🆕 added here
 
 # Messaging router WITHOUT prefix
 app.include_router(messaging.router)
