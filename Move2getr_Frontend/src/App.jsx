@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Navbar from "./components/Navbar.jsx";
 import SidebarTopics from "./components/SidebarTopics.jsx";
 import PostFeed from "./components/PostFeed.jsx";
@@ -10,8 +10,9 @@ import Footer from "./components/Footer.jsx";
 import WaveDivider from "./components/WaveDivider.jsx";
 import ScrollTeaser from "./components/ScrollTeaser.jsx";
 import UserProfile from "./components/UserProfile.jsx";
-import SplashOverlay from "./components/SplashOverlay.jsx"; // ✅ Splash screen
-import ParallaxBackground from "./components/ParallaxBackground.jsx"; // ✅ Parallaxe
+import SplashOverlay from "./components/SplashOverlay.jsx";
+import ParallaxBackground from "./components/ParallaxBackground.jsx";
+import { getCurrentUser } from "./auth_utils.js"; // <-- J'ai ajouté cette importation
 
 function App() {
   const [user, setUser] = useState(null);
@@ -20,11 +21,26 @@ function App() {
 
   const postFeedRef = useRef(null);
 
-  const handleLogin = (username) => {
-    localStorage.setItem("move2getr_user", username);
-    setUser(username);
-    setShowAuth(false);
+  const handleLogin = async () => {
+    const userData = await getCurrentUser();
+    if (userData) {
+      setUser(userData);
+      setShowAuth(false);
+    } else {
+      alert("Erreur lors de la récupération du profil !");
+    }
   };
+
+  useEffect(() => {
+    // Essayer de récupérer automatiquement l'utilisateur connecté au démarrage
+    async function fetchUser() {
+      const userData = await getCurrentUser();
+      if (userData) {
+        setUser(userData);
+      }
+    }
+    fetchUser();
+  }, []);
 
   const scrollToFeed = () => {
     postFeedRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -43,6 +59,7 @@ function App() {
         onNavigate={setCurrentPage}
         isLoggedIn={!!user}
         onShowLogin={() => setShowAuth(true)}
+        user={user} // <-- je passe aussi user dans Navbar maintenant
       />
 
       {/* FORMULAIRE DE CONNEXION */}
@@ -65,6 +82,11 @@ function App() {
                     <ScrollTeaser />
                   </>
                 )}
+                {user && (
+                  <div className="text-2xl font-bold mb-6 text-[#3B2F2F]">
+                    Salut {user.name} 👋
+                  </div>
+                )}
                 <div ref={postFeedRef}>
                   <PostFeed user={user} />
                 </div>
@@ -72,10 +94,12 @@ function App() {
             )}
 
             {currentPage === "inbox" && (
-              <InboxChat currentUser={user || "Visiteur"} />
+              <InboxChat currentUser={user ? user.username : "Visiteur"} />
             )}
 
-            {currentPage === "profile" && <UserProfile user={user} />}
+            {currentPage === "profile" && (
+              <UserProfile user={user} />
+            )}
           </main>
 
           {/* SIDEBAR DROITE */}

@@ -11,15 +11,15 @@ export default function UserProfile({ user }) {
   const [showEdit, setShowEdit] = useState(false);
   const [myPosts, setMyPosts] = useState([]);
 
-  const [avatar, setAvatar] = useState(`https://api.dicebear.com/7.x/lorelei/svg?seed=${user}`);
+  const [avatar, setAvatar] = useState(`https://api.dicebear.com/7.x/lorelei/svg?seed=${user.username}`);
   const [banner, setBanner] = useState("/images/banner-africa.jpg");
 
   const userInfo = {
-    name: "Adjiey Koffi Jean-Luc",
-    username: user,
-    age: 19,
-    country: "Côte d’Ivoire",
-    bio: "Étudiant en informatique passionné par l’IA 🌍",
+    name: `${user.name} ${user.surname}`,   // 🔥 Dynamique
+    username: user.username,
+    age: user.age,
+    country: user.nationality,
+    bio: "Étudiant Move2getr 🌍",            // Tu pourras rendre ça éditable plus tard
     avatar,
     banner,
   };
@@ -46,6 +46,7 @@ export default function UserProfile({ user }) {
           />
         </label>
 
+        {/* AVATAR */}
         <div className="absolute -bottom-16 left-6">
           <div className="relative">
             <img
@@ -53,8 +54,6 @@ export default function UserProfile({ user }) {
               alt="Avatar"
               className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
             />
-
-            {/* Modifier avatar */}
             <label className="absolute bottom-0 right-0 bg-white bg-opacity-80 rounded-full p-1 cursor-pointer hover:bg-opacity-100 transition transform hover:scale-105 hover:shadow text-xs">
               📷
               <input
@@ -119,7 +118,7 @@ export default function UserProfile({ user }) {
           </button>
         </div>
 
-        {/* ZONE DE CONTENU PAR ONGLET */}
+        {/* ZONE DE CONTENU */}
         <div className="mt-6">
           {activeTab === "posts" && (
             <>
@@ -129,10 +128,7 @@ export default function UserProfile({ user }) {
                   <p className="text-gray-500">Aucune publication pour le moment.</p>
                 ) : (
                   myPosts.map((post, index) => (
-                    <div
-                      key={index}
-                      className="bg-[#FFF7E8] border border-[#D6B56D] rounded-lg shadow p-4"
-                    >
+                    <div key={index} className="bg-[#FFF7E8] border border-[#D6B56D] rounded-lg shadow p-4">
                       <div className="text-sm text-gray-600 mb-1">
                         Posté par <span className="font-semibold text-[#3B2F2F]">{post.author}</span>
                       </div>
@@ -153,14 +149,13 @@ export default function UserProfile({ user }) {
               </div>
             </>
           )}
-
           {activeTab === "media" && <UserMediaGallery />}
           {activeTab === "messages" && <UserMessages />}
           {activeTab === "settings" && <UserSettings />}
         </div>
       </div>
 
-      {/* MODAL DE MODIFICATION */}
+      {/* MODAL ÉDITION */}
       {showEdit && <EditProfileModal user={userInfo} onClose={() => setShowEdit(false)} />}
     </div>
   );
