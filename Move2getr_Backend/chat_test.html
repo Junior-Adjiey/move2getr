@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat and Notifications 🚀</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .contact { padding: 10px; margin: 5px; border: 1px solid #ccc; display: flex; align-items: center; cursor: pointer; }
+        .badge { background-color: blue; color: white; border-radius: 50%; padding: 5px 10px; margin-left: auto; }
+        #messages { margin-top: 20px; }
+        #notifications { position: fixed; top: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; width: 250px; }
+        #notifications h3 { margin-top: 0; }
+    </style>
+</head>
+<body>
+
+<h2>Contacts</h2>
+<div id="contacts"></div>
+
+<h2>Messages</h2>
+<ul id="messages"></ul>
+
+<input type="text" id="messageInput" placeholder="Type your message..." />
+<button onclick="sendMessage()">Send</button>
+
+<div id="notifications">
+    <h3>🔔 Notifications</h3>
+    <ul id="notificationList"></ul>
+</div>
+
+<script>
+    let token = prompt("Enter your token:");
+    let ws;
+    let currentChatUser = "";
+
+    if (!token) {
+        alert("❌ Token is required to chat.");
+        throw new Error("No token provided");
+    }
+
+    async function fetchUnreadCounts() {
+        const contacts = ["alice", "bob", "charlie"];  // Example contacts
+        const container = document.getElementById("contacts");
+        container.innerHTML = '';
+
+        for (let user of contacts) {
+            const response = await fetch(`http://localhost:8000/messaging/messages/unread_count/${user}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await response.json();
+
+            const div = document.createElement("div");
+            div.className = "contact";
+            div.textContent = user;
+            div.onclick = () => openChat(user);
+
+            if (data.unread_count > 0) {
+                const badge = document.createElement("span");
+                badge.className = "badge";
+                badge.textContent = data.unread_count;
+                div.appendChild(badge);
+            }
+
+            container.appendChild(div);
+        }
+    }
+
+    async function openChat(username) {
+        currentChatUser = username;
+        document.getElementById("messages").innerHTML = '';
+
+        await fetch(`http://localhost:8000/messaging/messages/mark_as_read/${username}`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        connectWebSocket();
+
+        fetchUnreadCounts();
+    }
+
+    function connectWebSocket() {
+        if (ws) {
+            ws.close();
+        }
+
+        ws = new WebSocket(`ws://localhost:8000/ws/chat?token=${token}`);
+
+        ws.onopen = () => {
+            console.log("✅ WebSocket connected!");
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+
+            if (data.type === "message" || data.type === "group_message") {
+                const msgList = document.getElementById("messages");
+                const li = document.createElement("li");
+                li.textContent = `${data.sender}: ${data.text}`;
+                msgList.appendChild(li);
+            } 
+            else if (data.type === "notification") {
+                const notifList = document.getElementById("notificationList");
+                const li = document.createElement("li");
+                li.innerHTML = `<strong>${data.title}:</strong> ${data.description}`;
+                notifList.appendChild(li);
+            } 
+            else {
+                console.warn("Unknown message type:", data);
+            }
+        };
+
+        ws.onerror = (error) => {
+            console.error("WebSocket error:", error);
+        };
+    }
+
+    function sendMessage() {
+        const input = document.getElementById("messageInput");
+        const text = input.value.trim();
+        if (text && ws && currentChatUser) {
+            ws.send(JSON.stringify({ type: "message", receiver: currentChatUser, message: text }));
+            input.value = '';
+        } else {
+            alert("⚠️ No user selected or empty message.");
+        }
+    }
+
+    fetchUnreadCounts();
+    connectWebSocket();  // Connect immediately to listen for notifications
+</script>
+
+</body>
+</html>
+
+
+
+
+
