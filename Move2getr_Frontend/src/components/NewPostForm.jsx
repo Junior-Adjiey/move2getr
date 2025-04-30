@@ -1,68 +1,78 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { Camera, Video } from "lucide-react";
 
-export default function NewPostForm({ onPost }) {
-  const [title, setTitle] = useState("");
+export default function PostComposer({ onPost, user }) {
   const [content, setContent] = useState("");
   const [media, setMedia] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!title || !content) return;
-    onPost({ title, content, media, author: localStorage.getItem("move2getr_user") });
-    setTitle("");
+    if (!content.trim()) return;
+
+    onPost({
+      title: "New Post",
+      content,
+      media_url: media ? URL.createObjectURL(media) : null,
+    });
+
     setContent("");
     setMedia(null);
   };
 
+  const avatarURL = user?.avatar
+    ? user.avatar.startsWith("http")
+      ? user.avatar
+      : `http://localhost:8000/${user.avatar}`
+    : `https://api.dicebear.com/7.x/lorelei/svg?seed=${user?.username || "anon"}`;
+
   return (
-    <motion.form
+    <form
       onSubmit={handleSubmit}
-      className="bg-white p-6 rounded-lg shadow-md border border-[#D6B56D] space-y-4 mb-6"
-      initial="hidden"
-      animate="visible"
-      variants={{
-        visible: { transition: { staggerChildren: 0.2 } },
-        hidden: {},
-      }}
+      className="bg-white rounded-lg shadow p-4 mb-6 border border-gray-200"
     >
-      <motion.input
-        type="text"
-        placeholder="Titre de ta publication"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        className="w-full border p-2 rounded text-[#3B2F2F]"
-        variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-      />
-
-      <motion.textarea
-        placeholder="Exprime-toi ici..."
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        className="w-full border p-2 rounded min-h-[100px] text-[#3B2F2F]"
-        variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-      />
-
-      <motion.div
-        variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-        className="flex flex-col sm:flex-row items-start sm:items-center gap-2"
-      >
-        <label className="text-sm text-gray-600">Ajouter une image ou une vidéo :</label>
-        <input
-          type="file"
-          accept="image/*,video/*"
-          onChange={(e) => setMedia(URL.createObjectURL(e.target.files[0]))}
-          className="text-sm"
+      {/* Top Row */}
+      <div className="flex items-center gap-3 mb-4">
+        <img
+          src={avatarURL}
+          alt="avatar"
+          className="w-10 h-10 rounded-full object-cover border"
         />
-      </motion.div>
+        <input
+          type="text"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="What's on your mind?"
+          className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none"
+        />
+      </div>
 
-      <motion.button
-        type="submit"
-        className="bg-[#D9735B] text-white px-6 py-2 rounded hover:bg-[#c9614b] transition"
-        variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-      >
-        Publier
-      </motion.button>
-    </motion.form>
+      <hr className="my-3" />
+
+      {/* Action Buttons */}
+      <div className="flex items-center justify-between text-sm text-gray-600 font-medium">
+        <label className="flex items-center gap-2 cursor-pointer hover:text-red-600">
+          <Video size={16} className="text-red-500" />
+          Live Video
+        </label>
+
+        <label className="flex items-center gap-2 cursor-pointer hover:text-green-600">
+          <Camera size={16} className="text-green-600" />
+          Photo/Video
+          <input
+            type="file"
+            accept="image/*,video/*"
+            className="hidden"
+            onChange={(e) => setMedia(e.target.files[0])}
+          />
+        </label>
+
+        <button
+          type="submit"
+          className="bg-[#D9735B] text-white px-4 py-1 rounded hover:bg-[#c9614b] transition"
+        >
+          Post
+        </button>
+      </div>
+    </form>
   );
 }

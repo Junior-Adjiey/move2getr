@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { toast } from "react-hot-toast"; // Ajouté ici 🔥
 
 const africanCountries = [
   "Côte d'Ivoire", "Sénégal", "Mali", "Burkina Faso", "Togo",
@@ -37,11 +38,11 @@ export default function Auth({ onLogin }) {
     try {
       if (isRegister) {
         if (!validatePassword(formData.password)) {
-          alert("Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un symbole.");
+          toast.error("Mot de passe invalide : au moins 8 caractères, 1 majuscule, 1 chiffre, 1 symbole.");
           return;
         }
         if (formData.password !== formData.confirmPassword) {
-          alert("Les mots de passe ne correspondent pas.");
+          toast.error("Les mots de passe ne correspondent pas.");
           return;
         }
 
@@ -58,7 +59,7 @@ export default function Auth({ onLogin }) {
           gender: formData.genre
         });
 
-        alert("Compte créé avec succès 🎉 Connecte-toi maintenant !");
+        toast.success("Compte créé avec succès 🎉 Connecte-toi maintenant !");
         setIsRegister(false);
       } else {
         // Connexion
@@ -69,12 +70,12 @@ export default function Auth({ onLogin }) {
 
         const { access_token } = response.data;
         localStorage.setItem("move2getr_token", access_token);
-        alert("Connexion réussie 🔥");
-        onLogin(formData.email);
+        toast.success("Connexion réussie 🔥");
+        onLogin();
       }
     } catch (error) {
       console.error(error);
-      alert("Erreur : " + (error.response?.data?.detail || "Une erreur s'est produite"));
+      toast.error("Erreur : " + (error.response?.data?.detail || "Une erreur s'est produite"));
     }
   };
 

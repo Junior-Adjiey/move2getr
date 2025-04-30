@@ -44,7 +44,7 @@ export default function Carousel() {
       >
         {slides.map((slide, index) => (
           <SwiperSlide key={index}>
-            <div className="relative w-[290px] h-[170px] rounded-xl overflow-hidden shadow-md hover:shadow-lg transition cursor-pointer">
+            <div className="relative w-[220px] h-[170px] rounded-xl overflow-hidden shadow-md hover:shadow-lg transition cursor-pointer">
               <img
                 src={slide.img}
                 alt={slide.title}

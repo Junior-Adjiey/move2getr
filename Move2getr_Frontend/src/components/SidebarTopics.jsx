@@ -1,50 +1,51 @@
 import {
-  Flame,
-  Heart,
-  GraduationCap,
-  School,
-  HelpCircle,
+  UserCircle,
+  CircleDot,
+  Users,
   Clock,
-  Star
+  Bookmark,
+  Layers3,
+  Video,
+  Store,
+  Newspaper,
+  Calendar,
+  BarChart3,
+  ChevronDown
 } from "lucide-react";
 
-export default function SidebarTopics() {
+export default function SidebarTopics({ user }) {
+  const items = [
+    { icon: <UserCircle size={20} />, label: `${user?.name || "My Profile"} ${user?.surname || ""}` },
+    { icon: <CircleDot size={20} />, label: "Meta AI" },
+    { icon: <Users size={20} />, label: "Friends" },
+    { icon: <Clock size={20} />, label: "Memories" },
+    { icon: <Bookmark size={20} />, label: "Saved" },
+    { icon: <Layers3 size={20} />, label: "Groups" },
+    { icon: <Video size={20} />, label: "Videos" },
+    { icon: <Store size={20} />, label: "Marketplace" },
+    { icon: <Newspaper size={20} />, label: "Feeds" },
+    { icon: <Calendar size={20} />, label: "Events" },
+    { icon: <BarChart3 size={20} />, label: "Analytics" },
+  ];
+
   return (
-    <aside className="w-full lg:w-56 bg-[#FAF3E0] text-[#3B2F2F] p-4 lg:p-6 border-r border-[#D6B56D]">
-      <h2 className="text-lg font-bold mb-6 tracking-wide">POPULAR</h2>
+    <aside className="fixed top-28 left-4 w-60 h-[85vh] bg-white shadow-lg rounded-xl p-5 overflow-y-auto hidden lg:block text-[#3B2F2F]">
+      <h2 className="text-lg font-bold mb-6">Main Menu</h2>
       <ul className="space-y-4 text-sm font-medium">
-        <li className="flex items-center gap-2 cursor-pointer hover:text-[#D9735B]">
-          <Flame size={18} />
-          Trending
-        </li>
-        <li className="flex items-center gap-2 cursor-pointer hover:text-[#D9735B]">
-          <Heart size={18} />
-          Culture & Lifestyle
-        </li>
-        <li className="flex items-center gap-2 cursor-pointer hover:text-[#D9735B]">
-          <GraduationCap size={18} />
-          Preparation Tips
-        </li>
-        <li className="flex items-center gap-2 cursor-pointer hover:text-[#D9735B]">
-          <School size={18} />
-          Campus
-        </li>
-        <li className="flex items-center gap-2 cursor-pointer hover:text-[#D9735B]">
-          <HelpCircle size={18} />
-          Ask
-        </li>
-        <li className="flex items-center gap-2 cursor-pointer hover:text-[#D9735B]">
-          <Clock size={18} />
-          Latest
+        {items.map((item, i) => (
+          <li
+            key={i}
+            className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition"
+          >
+            {item.icon}
+            {item.label}
+          </li>
+        ))}
+        <li className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition">
+          <ChevronDown size={20} />
+          See more
         </li>
       </ul>
-
-      <div className="mt-10 border-t pt-4 border-[#D6B56D]">
-        <div className="flex items-center gap-2 text-sm font-bold text-[#D9735B] cursor-pointer hover:underline">
-          <Star size={16} />
-          MOVE2GETR PRO
-        </div>
-      </div>
     </aside>
   );
 }

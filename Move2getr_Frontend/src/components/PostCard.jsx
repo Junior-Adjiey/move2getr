@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { ThumbsUp, ThumbsDown, MessageCircle } from "lucide-react";
 
 export default function PostCard({ title, content, author = "Anonyme", user }) {
   const [likes, setLikes] = useState(0);
@@ -23,74 +25,87 @@ export default function PostCard({ title, content, author = "Anonyme", user }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 mb-4">
-      <h3 className="text-lg font-bold text-orange-600 mb-1">{title}</h3>
-      <p className="text-gray-700 mb-2">{content}</p>
-      <span className="text-sm text-gray-500">Posté par {author}</span>
+    <motion.div
+      className="bg-white rounded-xl shadow-md border border-[#eee] p-5 mb-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <h3 className="text-xl font-bold text-[#D9735B] mb-2">{title}</h3>
+      <p className="text-gray-800 mb-3">{content}</p>
+      <span className="text-sm text-gray-500 block mb-4">
+        Posté par <strong>{author}</strong>
+      </span>
 
-      {/* Like / Dislike */}
-      <div className="flex items-center space-x-4 mt-3 mb-3">
-        <button
+      {/* Réactions */}
+      <div className="flex items-center gap-6 mb-4 text-sm">
+        <motion.button
           onClick={handleLike}
-          className={`flex items-center ${
+          whileTap={{ scale: 1.2 }}
+          disabled={!user}
+          className={`flex items-center gap-1 transition ${
             user
               ? "text-green-600 hover:text-green-800"
               : "text-gray-400 cursor-not-allowed"
-          } transition`}
+          }`}
         >
-          👍 <span className="ml-1">{likes}</span>
-        </button>
-        <button
+          <ThumbsUp size={18} /> {likes}
+        </motion.button>
+
+        <motion.button
           onClick={handleDislike}
-          className={`flex items-center ${
+          whileTap={{ scale: 1.2 }}
+          disabled={!user}
+          className={`flex items-center gap-1 transition ${
             user
               ? "text-red-600 hover:text-red-800"
               : "text-gray-400 cursor-not-allowed"
-          } transition`}
+          }`}
         >
-          👎 <span className="ml-1">{dislikes}</span>
-        </button>
+          <ThumbsDown size={18} /> {dislikes}
+        </motion.button>
+
+        <span className="text-gray-500 flex items-center gap-1">
+          <MessageCircle size={18} /> {comments.length} commentaire(s)
+        </span>
       </div>
 
-      {/* Commentaire */}
+      {/* Zone de commentaire */}
       {user ? (
-        <form onSubmit={handleComment} className="mt-4">
+        <form onSubmit={handleComment} className="flex flex-col gap-2 mt-2">
           <input
             type="text"
-            placeholder="Ajoute un commentaire..."
+            placeholder="💬 Ajoute un commentaire..."
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            className="w-full px-3 py-2 border rounded-md mb-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#D9735B] outline-none"
           />
           <button
             type="submit"
-            className="bg-orange-500 text-white px-4 py-1 rounded hover:bg-orange-600"
+            className="self-end bg-[#D9735B] text-white text-sm px-4 py-1.5 rounded hover:bg-[#c9614b] transition"
           >
             Commenter
           </button>
         </form>
       ) : (
-        <p className="text-sm text-gray-500">Connecte-toi pour commenter 💬</p>
+        <p className="text-sm text-gray-400 italic">
+          Connecte-toi pour commenter 💬
+        </p>
       )}
 
       {/* Affichage des commentaires */}
       {comments.length > 0 && (
-        <div className="mt-4 border-t pt-2">
-          <h4 className="text-sm font-semibold text-gray-700 mb-1">
-            Commentaires :
-          </h4>
-          <ul className="space-y-1">
+        <div className="mt-4 border-t pt-3">
+          <h4 className="text-sm font-semibold text-gray-700 mb-2">Commentaires :</h4>
+          <ul className="space-y-2">
             {comments.map((c, i) => (
-              <li
-                key={i}
-                className="text-sm text-gray-600 bg-gray-50 p-2 rounded"
-              >
-                {c}
+              <li key={i} className="bg-gray-50 p-2 rounded text-sm text-gray-700">
+                <span className="text-[#D9735B] font-medium mr-2">@Moi</span> {c}
               </li>
             ))}
           </ul>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

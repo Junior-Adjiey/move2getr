@@ -1,162 +1,103 @@
-import { useState } from "react";
-import { Settings, MessageCircle, Image, FileText } from "lucide-react";
-import EditProfileModal from "./EditProfileModal.jsx";
-import UserMessages from "./UserMessages.jsx";
-import UserMediaGallery from "./UserMediaGallery.jsx";
+import { useEffect, useState } from "react";
 import NewPostForm from "./NewPostForm.jsx";
-import UserSettings from "./UserSettings.jsx";
+import PostCard from "./PostCard.jsx";
 
 export default function UserProfile({ user }) {
-  const [activeTab, setActiveTab] = useState("posts");
-  const [showEdit, setShowEdit] = useState(false);
-  const [myPosts, setMyPosts] = useState([]);
-
+  const [posts, setPosts] = useState([]);
   const [avatar, setAvatar] = useState(`https://api.dicebear.com/7.x/lorelei/svg?seed=${user.username}`);
   const [banner, setBanner] = useState("/images/banner-africa.jpg");
+  const [bio, setBio] = useState("🎓 Move2getr student passionate about Europe and tech.");
+  const [activeView, setActiveView] = useState("list");
 
-  const userInfo = {
-    name: `${user.name} ${user.surname}`,   // 🔥 Dynamique
-    username: user.username,
-    age: user.age,
-    country: user.nationality,
-    bio: "Étudiant Move2getr 🌍",            // Tu pourras rendre ça éditable plus tard
-    avatar,
-    banner,
-  };
+  useEffect(() => {
+    setPosts([]); // Simulated loading
+  }, []);
 
   return (
     <div className="bg-[#FDF7EC] min-h-screen text-[#3B2F2F]">
-      {/* BANNIÈRE */}
-      <div className="relative w-full h-56 bg-gray-300">
-        <img src={userInfo.banner} alt="Bannière" className="w-full h-full object-cover" />
 
-        {/* Modifier bannière */}
-        <label className="absolute top-2 right-2 bg-white bg-opacity-80 text-xs px-2 py-1 rounded cursor-pointer hover:bg-opacity-100 transition transform hover:scale-105 hover:shadow">
-          Modifier la bannière
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files[0];
-              if (file) {
-                setBanner(URL.createObjectURL(file));
-              }
-            }}
-            className="hidden"
-          />
+      {/* BANNER */}
+      <div className="relative h-64 w-full bg-gray-200">
+        <img src={banner} alt="banner" className="w-full h-full object-cover" />
+        <label className="absolute top-3 right-3 bg-white/80 px-2 py-1 rounded text-xs cursor-pointer hover:shadow">
+          Change banner
+          <input type="file" className="hidden" onChange={(e) => setBanner(URL.createObjectURL(e.target.files[0]))} />
         </label>
 
         {/* AVATAR */}
-        <div className="absolute -bottom-16 left-6">
+        <div className="absolute -bottom-16 left-6 md:left-1/2 md:-translate-x-1/2">
           <div className="relative">
-            <img
-              src={userInfo.avatar}
-              alt="Avatar"
-              className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
-            />
-            <label className="absolute bottom-0 right-0 bg-white bg-opacity-80 rounded-full p-1 cursor-pointer hover:bg-opacity-100 transition transform hover:scale-105 hover:shadow text-xs">
+            <img src={avatar} alt="avatar" className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover" />
+            <label className="absolute bottom-0 right-0 bg-white/80 p-1 rounded-full cursor-pointer text-xs">
               📷
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    setAvatar(URL.createObjectURL(file));
-                  }
-                }}
-                className="hidden"
-              />
+              <input type="file" className="hidden" onChange={(e) => setAvatar(URL.createObjectURL(e.target.files[0]))} />
             </label>
           </div>
         </div>
       </div>
 
-      {/* INFOS UTILISATEUR */}
-      <div className="mt-20 px-6 max-w-4xl mx-auto">
-        <div className="flex justify-between items-center flex-wrap gap-4">
-          <div>
-            <h1 className="text-2xl font-bold">{userInfo.name}</h1>
-            <p className="text-sm text-gray-600">
-              @{userInfo.username} · {userInfo.age} ans · {userInfo.country}
-            </p>
-            <p className="mt-2">{userInfo.bio}</p>
+      {/* BODY */}
+      <div className="flex flex-col md:flex-row gap-6 px-4 mt-24 max-w-6xl mx-auto">
+        {/* LEFT SIDE */}
+        <div className="md:w-1/3 space-y-4">
+          <div className="bg-white rounded shadow p-4">
+            <h2 className="text-lg font-bold mb-2">Intro</h2>
+            <p className="text-sm text-gray-700">{bio}</p>
+            <button className="mt-3 text-sm text-blue-600 hover:underline">✏️ Add a bio</button>
+            <hr className="my-3" />
+            <div className="space-y-1 text-sm text-gray-600">
+              <p><strong>Name:</strong> {user.name} {user.surname}</p>
+              <p><strong>Email:</strong> {user.email}</p>
+              <p><strong>Age:</strong> {user.age} y/o</p>
+              <p><strong>Nationality:</strong> {user.nationality}</p>
+              <p><strong>Gender:</strong> {user.gender}</p>
+            </div>
+            <button className="mt-3 text-sm text-blue-600 hover:underline">⚙️ Edit info</button>
           </div>
-          <button
-            onClick={() => setShowEdit(true)}
-            className="bg-[#D9735B] text-white px-4 py-2 rounded-full font-medium transition transform hover:scale-105 hover:shadow-md hover:bg-[#c9614b]"
-          >
-            Modifier le profil
-          </button>
+
+          <div className="bg-white rounded shadow p-4">
+            <h2 className="text-lg font-bold mb-2">Photos</h2>
+            <p className="text-sm text-gray-500">📷 Coming soon...</p>
+          </div>
         </div>
 
-        {/* NAVIGATION */}
-        <div className="mt-6 border-b border-[#D6B56D] flex gap-6 text-sm font-semibold">
-          <button
-            onClick={() => setActiveTab("posts")}
-            className={`pb-2 transition hover:scale-105 ${activeTab === "posts" ? "text-[#D9735B] border-b-2 border-[#D9735B]" : "text-gray-500"}`}
-          >
-            <FileText size={16} className="inline mr-1" /> Publications
-          </button>
-          <button
-            onClick={() => setActiveTab("media")}
-            className={`pb-2 transition hover:scale-105 ${activeTab === "media" ? "text-[#D9735B] border-b-2 border-[#D9735B]" : "text-gray-500"}`}
-          >
-            <Image size={16} className="inline mr-1" /> Photos/Vidéos
-          </button>
-          <button
-            onClick={() => setActiveTab("messages")}
-            className={`pb-2 transition hover:scale-105 ${activeTab === "messages" ? "text-[#D9735B] border-b-2 border-[#D9735B]" : "text-gray-500"}`}
-          >
-            <MessageCircle size={16} className="inline mr-1" /> Messages
-          </button>
-          <button
-            onClick={() => setActiveTab("settings")}
-            className={`pb-2 transition hover:scale-105 ${activeTab === "settings" ? "text-[#D9735B] border-b-2 border-[#D9735B]" : "text-gray-500"}`}
-          >
-            <Settings size={16} className="inline mr-1" /> Paramètres
-          </button>
-        </div>
+        {/* MIDDLE / POSTS */}
+        <div className="md:w-2/3 space-y-6">
+          <NewPostForm onPost={(newPost) => setPosts([newPost, ...posts])} />
 
-        {/* ZONE DE CONTENU */}
-        <div className="mt-6">
-          {activeTab === "posts" && (
-            <>
-              <NewPostForm onPost={(newPost) => setMyPosts([newPost, ...myPosts])} />
-              <div className="mt-6 space-y-6">
-                {myPosts.length === 0 ? (
-                  <p className="text-gray-500">Aucune publication pour le moment.</p>
-                ) : (
-                  myPosts.map((post, index) => (
-                    <div key={index} className="bg-[#FFF7E8] border border-[#D6B56D] rounded-lg shadow p-4">
-                      <div className="text-sm text-gray-600 mb-1">
-                        Posté par <span className="font-semibold text-[#3B2F2F]">{post.author}</span>
-                      </div>
-                      <h3 className="font-bold text-lg text-[#3B2F2F] mb-2">{post.title}</h3>
-                      <p className="text-sm text-[#3B2F2F] mb-2">{post.content}</p>
-                      {post.media && (
-                        <>
-                          {post.media.includes("video") ? (
-                            <video src={post.media} controls className="w-full max-h-72 rounded-lg" />
-                          ) : (
-                            <img src={post.media} alt="media" className="w-full max-h-72 object-cover rounded-lg" />
-                          )}
-                        </>
-                      )}
-                    </div>
-                  ))
-                )}
-              </div>
-            </>
+          {/* TOOLS */}
+          <div className="bg-white px-4 py-3 rounded shadow flex items-center justify-between text-sm border border-[#e6d9a4]">
+            <div className="flex items-center gap-2 text-[#3B2F2F] font-semibold">
+              Posts
+            </div>
+            <div className="flex gap-4">
+              <button onClick={() => setActiveView("list")} className={activeView === "list" ? "text-blue-600 font-bold" : "text-gray-500"}>
+                🧾 List View
+              </button>
+              <button onClick={() => setActiveView("grid")} className={activeView === "grid" ? "text-blue-600 font-bold" : "text-gray-500"}>
+                🟦 Grid View
+              </button>
+            </div>
+          </div>
+
+          {/* POSTS */}
+          {posts.length === 0 ? (
+            <p className="text-center text-gray-500 text-sm">No posts yet.</p>
+          ) : activeView === "list" ? (
+            <div className="space-y-6">
+              {posts.map((post, index) => (
+                <PostCard key={index} title={post.title} content={post.content} media={post.media_url} author={user.username} user={user} />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {posts.map((post, index) => (
+                <PostCard key={index} title={post.title} content={post.content} media={post.media_url} author={user.username} user={user} />
+              ))}
+            </div>
           )}
-          {activeTab === "media" && <UserMediaGallery />}
-          {activeTab === "messages" && <UserMessages />}
-          {activeTab === "settings" && <UserSettings />}
         </div>
       </div>
-
-      {/* MODAL ÉDITION */}
-      {showEdit && <EditProfileModal user={userInfo} onClose={() => setShowEdit(false)} />}
     </div>
   );
 }
