@@ -1,26 +1,26 @@
 import { useState } from "react";
 import axios from "axios";
-import { toast } from "react-hot-toast"; // Ajouté ici 🔥
+import { toast } from "react-hot-toast";
 
 const africanCountries = [
-  "Côte d'Ivoire", "Sénégal", "Mali", "Burkina Faso", "Togo",
-  "Bénin", "Cameroun", "Gabon", "Congo", "RD Congo", "Nigéria",
-  "Ghana", "Afrique du Sud", "Maroc", "Algérie", "Tunisie",
-  "Kenya", "Égypte", "Éthiopie", "Tanzanie"
+  "Ivory Coast", "Senegal", "Mali", "Burkina Faso", "Togo",
+  "Benin", "Cameroon", "Gabon", "Congo", "DR Congo", "Nigeria",
+  "Ghana", "South Africa", "Morocco", "Algeria", "Tunisia",
+  "Kenya", "Egypt", "Ethiopia", "Tanzania"
 ];
 
 export default function Auth({ onLogin }) {
   const [isRegister, setIsRegister] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
-    nom: "",
-    prenoms: "",
+    firstName: "",
+    lastName: "",
     username: "",
     password: "",
     confirmPassword: "",
-    nationalite: "",
+    nationality: "",
     age: "",
-    genre: "",
+    gender: "",
   });
 
   const handleChange = (e) => {
@@ -38,31 +38,29 @@ export default function Auth({ onLogin }) {
     try {
       if (isRegister) {
         if (!validatePassword(formData.password)) {
-          toast.error("Mot de passe invalide : au moins 8 caractères, 1 majuscule, 1 chiffre, 1 symbole.");
+          toast.error("Invalid password: at least 8 chars, 1 uppercase, 1 digit, 1 symbol.");
           return;
         }
         if (formData.password !== formData.confirmPassword) {
-          toast.error("Les mots de passe ne correspondent pas.");
+          toast.error("Passwords do not match.");
           return;
         }
 
-        // Inscription - Correction : on envoie aussi confirm_password
         await axios.post("http://localhost:8000/auth/register", {
           email: formData.email,
           password: formData.password,
           confirm_password: formData.confirmPassword,
           username: formData.username,
-          name: formData.nom,
-          surname: formData.prenoms,
-          nationality: formData.nationalite,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          nationality: formData.nationality,
           age: parseInt(formData.age),
-          gender: formData.genre
+          gender: formData.gender,
         });
 
-        toast.success("Compte créé avec succès 🎉 Connecte-toi maintenant !");
+        toast.success("Account created 🎉 Please login!");
         setIsRegister(false);
       } else {
-        // Connexion
         const response = await axios.post("http://localhost:8000/auth/login", {
           email: formData.email,
           password: formData.password,
@@ -70,36 +68,36 @@ export default function Auth({ onLogin }) {
 
         const { access_token } = response.data;
         localStorage.setItem("move2getr_token", access_token);
-        toast.success("Connexion réussie 🔥");
+        toast.success("Login successful 🔥");
         onLogin();
       }
     } catch (error) {
       console.error(error);
-      toast.error("Erreur : " + (error.response?.data?.detail || "Une erreur s'est produite"));
+      toast.error("Error: " + (error.response?.data?.detail || "An error occurred"));
     }
   };
 
   return (
     <div className="fixed inset-0 bg-[url('/background.jpg')] bg-cover bg-center backdrop-blur-sm flex items-center justify-center">
       <div className="bg-white/90 shadow-2xl rounded-xl flex max-w-5xl w-full mx-6">
-        {/* Partie gauche */}
+        {/* Left section */}
         <div className="w-1/2 hidden md:flex flex-col justify-center p-10">
           <h1 className="text-4xl font-bold text-green-700 mb-4">MOVE2GETR</h1>
           <p className="text-lg text-gray-700">
-            Crée des liens. Reste connecté. Explore l’Europe en communauté.
+            Create connections. Stay connected. Explore Europe together.
           </p>
         </div>
 
-        {/* Formulaire */}
+        {/* Form section */}
         <form onSubmit={handleSubmit} className="w-full md:w-1/2 p-8 space-y-4">
           <h2 className="text-2xl font-bold text-center text-red-600">
-            {isRegister ? "Créer un compte" : "Connexion"}
+            {isRegister ? "Create Account" : "Login"}
           </h2>
 
           <input
             type="email"
             name="email"
-            placeholder="Adresse email"
+            placeholder="Email address"
             value={formData.email}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -111,18 +109,18 @@ export default function Auth({ onLogin }) {
               <div className="flex gap-4">
                 <input
                   type="text"
-                  name="nom"
-                  placeholder="Nom"
-                  value={formData.nom}
+                  name="firstName"
+                  placeholder="First Name"
+                  value={formData.firstName}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded"
                   required
                 />
                 <input
                   type="text"
-                  name="prenoms"
-                  placeholder="Prénoms"
-                  value={formData.prenoms}
+                  name="lastName"
+                  placeholder="Last Name"
+                  value={formData.lastName}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded"
                   required
@@ -132,7 +130,7 @@ export default function Auth({ onLogin }) {
               <input
                 type="text"
                 name="username"
-                placeholder="Nom d'utilisateur"
+                placeholder="Username"
                 value={formData.username}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border rounded"
@@ -142,7 +140,7 @@ export default function Auth({ onLogin }) {
               <input
                 type="password"
                 name="password"
-                placeholder="Mot de passe"
+                placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border rounded"
@@ -152,7 +150,7 @@ export default function Auth({ onLogin }) {
               <input
                 type="password"
                 name="confirmPassword"
-                placeholder="Confirmez le mot de passe"
+                placeholder="Confirm Password"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border rounded"
@@ -161,24 +159,22 @@ export default function Auth({ onLogin }) {
 
               <div className="flex gap-4">
                 <select
-                  name="nationalite"
-                  value={formData.nationalite}
+                  name="nationality"
+                  value={formData.nationality}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded"
                   required
                 >
-                  <option value="">-- Nationalité --</option>
-                  {africanCountries.map((country, index) => (
-                    <option key={index} value={country}>
-                      {country}
-                    </option>
+                  <option value="">-- Nationality --</option>
+                  {africanCountries.map((country, idx) => (
+                    <option key={idx} value={country}>{country}</option>
                   ))}
                 </select>
 
                 <input
                   type="number"
                   name="age"
-                  placeholder="Âge"
+                  placeholder="Age"
                   value={formData.age}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded"
@@ -187,16 +183,16 @@ export default function Auth({ onLogin }) {
               </div>
 
               <select
-                name="genre"
-                value={formData.genre}
+                name="gender"
+                value={formData.gender}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border rounded"
                 required
               >
-                <option value="">-- Genre --</option>
-                <option value="Homme">Homme</option>
-                <option value="Femme">Femme</option>
-                <option value="Autre">Autre</option>
+                <option value="">-- Gender --</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
               </select>
             </>
           )}
@@ -205,7 +201,7 @@ export default function Auth({ onLogin }) {
             <input
               type="password"
               name="password"
-              placeholder="Mot de passe"
+              placeholder="Password"
               value={formData.password}
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded"
@@ -213,20 +209,12 @@ export default function Auth({ onLogin }) {
             />
           )}
 
-          <button
-            type="submit"
-            className="bg-green-600 text-white w-full py-2 rounded hover:bg-green-700 transition"
-          >
-            {isRegister ? "S'inscrire" : "Se connecter"}
+          <button className="bg-green-600 text-white w-full py-2 rounded hover:bg-green-700 transition">
+            {isRegister ? "Register" : "Login"}
           </button>
 
-          <p
-            className="text-sm text-center text-gray-600 cursor-pointer hover:underline"
-            onClick={() => setIsRegister(!isRegister)}
-          >
-            {isRegister
-              ? "Tu as déjà un compte ? Connecte-toi"
-              : "Pas encore inscrit ? Crée un compte"}
+          <p className="text-sm text-center text-gray-600 cursor-pointer hover:underline" onClick={() => setIsRegister(!isRegister)}>
+            {isRegister ? "Already have an account? Login" : "No account? Register"}
           </p>
         </form>
       </div>
